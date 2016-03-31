@@ -10,3 +10,6 @@ C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\ServerTest\Se
 C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\ServerTest\ServerTest\bin\Debug\ServerTest.exe
 C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\ServerTest\ServerTest\bin\Debug\ServerTest.pdb
 C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\ServerTest\ServerTest\obj\Debug\ServerTest.csprojResolveAssemblyReference.cache
+C:\Users\Nicolai\Documents\Matlab-port\ServerTest\ServerTest\bin\Debug\ServerTest.exe.config
+C:\Users\Nicolai\Documents\Matlab-port\ServerTest\ServerTest\obj\Debug\ServerTest.exe
+C:\Users\Nicolai\Documents\Matlab-port\ServerTest\ServerTest\obj\Debug\ServerTest.pdb

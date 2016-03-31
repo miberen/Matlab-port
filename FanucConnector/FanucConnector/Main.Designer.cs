@@ -87,9 +87,11 @@
             // rTBox_main
             // 
             this.rTBox_main.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.rTBox_main.HideSelection = false;
             this.rTBox_main.Location = new System.Drawing.Point(18, 170);
             this.rTBox_main.Name = "rTBox_main";
             this.rTBox_main.ReadOnly = true;
+            this.rTBox_main.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.rTBox_main.Size = new System.Drawing.Size(513, 238);
             this.rTBox_main.TabIndex = 1;
             this.rTBox_main.Text = "";

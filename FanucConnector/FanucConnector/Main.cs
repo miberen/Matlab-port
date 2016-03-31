@@ -49,30 +49,31 @@ namespace FanucConnector
             }
             catch (SocketException e)
             {
-                rTBox_main.AppendText("SocketException: {0}" + e);
+                rTBox_main.AppendText("SocketException: {0}" + e + "\n");
             }
         }
 
         void OpenGrapper()
         {
-             RobotSend("GRABOFF;");
+            RobotSend("GRABOFF;");
+            RecieveData();    
         }
 
         void CloseGrapper()
         {
             RobotSend("GRABON;");
+            RecieveData();
         }
 
         #region Send/Recieve
 
         private void RobotSend(string data)
         {
-            
-            _hostStream.Flush();
             if (_hostStream.CanWrite)
             {
+                _hostStream.Flush();
                 byte[] outStream = Encoding.ASCII.GetBytes(data);
-                List<byte> outList= outStream.ToList();
+                List<byte> outList = outStream.ToList();
                 outList.Add(10);
                 _hostStream.Write(outList.ToArray(), 0, outList.Count);
 
@@ -84,12 +85,18 @@ namespace FanucConnector
             {
                 rTBox_main.AppendText("CanWrite is false! \n");
             }
-
+            
         }
 
-        private void Recieve()
+        private void RecieveData()
         {
-            
+            while (!_hostStream.DataAvailable) { }
+
+            byte[] inStream = new byte[1024];
+            _hostStream.Read(inStream, 0, inStream.Length);
+            string returnData = Encoding.ASCII.GetString(inStream);
+            rTBox_main.AppendText("Data Recieved:" + returnData);
+            rTBox_main.AppendText("\n");
         }
 
         #endregion
@@ -137,23 +144,24 @@ namespace FanucConnector
             }
         }
 
+        private void btn_moveJoint_Click(object sender, EventArgs e)
+        {
+            RobotMoveJoint(100, 100, 100, 100, 100, 100, 100);
+        }
+
         #endregion
 
         List<double> RobotGetPos()
         {
             
             RobotSend("GETPOS;");
-
             
-            while (!_hostStream.DataAvailable)
-            {
-                
-            }
+            while (!_hostStream.DataAvailable) { }
             
             byte[] inStream = new byte[1024];
             _hostStream.Read(inStream, 0, inStream.Length);
             string returnData = Encoding.ASCII.GetString(inStream);
-            rTBox_main.AppendText("Data Recieved:" + returnData);
+            rTBox_main.AppendText("Data Recieved:" + returnData + "\n");
             List<double> position = new List<double>();
             
             IEnumerable<string> strings = returnData.Split(new[] { ' ', ']', '[' }, StringSplitOptions.RemoveEmptyEntries).Where(s => !string.IsNullOrWhiteSpace(s) && s.Length < 50);
@@ -165,18 +173,11 @@ namespace FanucConnector
             }
             return position;
         }
-        /// <summary>
-        /// MoveJoint
-        /// </summary>
-        /// <param name="input">x, y, z, w, p, r, speed</param>
+
         void RobotMoveJoint(double x, double y, double z, double w, double p, double r, double speed)
         {
             RobotSend("MOVEJ;[" + x+ "," + y + "," + z + "," + w + "," + p + "," + r + "," + speed + "];");
-        }
-
-        private void btn_moveJoint_Click(object sender, EventArgs e)
-        {
-            RobotMoveJoint(100,100,100,100,100,100,100);
+            RecieveData();
         }
     }
 }

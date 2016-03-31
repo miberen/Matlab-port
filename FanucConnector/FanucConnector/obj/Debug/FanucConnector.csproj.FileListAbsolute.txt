@@ -16,3 +16,12 @@ C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnecto
 C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
 C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
 C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
+C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
