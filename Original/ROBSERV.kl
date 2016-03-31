@@ -1,0 +1,463 @@
+PROGRAM ROBSERV
+%ENVIRONMENT REGOPE 
+ 
+%comment= 'jan 2014 - ROBOT server: ip: 192.168.1.25; port = 59002'
+%alphabetize --Specifies that variables will be created in alphabetical order when p-code is loaded.
+----------------------------------------------------------------------------------
+%RWACCESS
+%STACKSIZE = 4000
+ 
+--%NOLOCKGROUP
+%NOPAUSE=ERROR+COMMAND+TPENABLE 
+%ENVIRONMENT uif
+%ENVIRONMENT sysdef
+%ENVIRONMENT memo
+%ENVIRONMENT kclop
+%ENVIRONMENT bynam
+%ENVIRONMENT fdev
+%ENVIRONMENT flbt
+%ENVIRONMENT STRNG 
+%ENVIRONMENT MULTI 
+%ENVIRONMENT TPE
+
+%INCLUDE klevccdf
+%INCLUDE klevkeys
+%INCLUDE klevkmsk
+------------------------------------------------------------------------------
+
+CONST
+	BUFFER_SIZE=20
+
+VAR
+	socket : FILE
+	entry,robotReady: integer
+	running : boolean
+	wrongData : boolean;
+------------------------------------------------------------------------------
+
+--------------------
+-- INITIALIZATION --
+--------------------
+
+ROUTINE initialize
+VAR
+	status : integer
+	tool : XYZWPR
+	user : XYZWPR
+BEGIN
+	tool.x = 0
+	tool.y = 0
+	tool.z = 0
+	tool.w = 0
+	tool.p = 0
+	tool.r = 0
+
+	user.x = 0
+	user.y = 0
+	user.z = 0
+	user.w = 0
+	user.p = 0
+	user.r = 0
+
+	WRITE(CHR(128)) 
+	running = TRUE
+	SET_VAR(entry, '*SYSTEM*','$HOSTS_CFG[3].$SERVER_PORT',59002,status)
+	$UTOOL = tool				-- Defines tool frame
+	$UFRAME = user		-- Sets user frame at current position
+	--TP_CLS					-- Forces user menu on TP to be cleared and shown
+END initialize
+
+
+----------------
+-- NETWORKING --
+----------------
+
+ROUTINE waitClient
+VAR
+	status : integer
+BEGIN
+	WRITE('Ver: Jan 2014: Robot Server waiting for connection...',cr)
+	MSG_CONNECT('S3:',status)
+	IF status = 0 THEN
+		OPEN FILE socket ('rw','S3:')
+		status = io_status(socket)
+		IF status = 0 THEN
+			WRITE('Server Connected :-)',cr)
+		ENDIF
+	ENDIF 
+END waitClient
+
+
+ROUTINE closeSocket
+VAR
+	status : integer
+BEGIN
+	CLOSE FILE socket 
+	WRITE('Disconnecting...',cr)
+	MSG_DISCO('S3:',status)
+END closeSocket
+
+
+----------------------
+-- STRING CONVERTER --
+----------------------
+
+-- Reading a stringf of the structure <double>,<double>,<double>
+ROUTINE getValues(message: string) : ARRAY OF REAL
+VAR
+	values: ARRAY[7] OF REAL
+	i,index,length : integer
+	str : string[128]
+	realval : REAL
+BEGIN
+	WRITE('Parsing string: ',message,cr)
+	index=1
+	str=''
+	length=STR_LEN(message)
+	IF (SUB_STR(message,1,1)<>'[') THEN
+		wrongData = TRUE
+		RETURN(values)
+	ENDIF
+	IF (SUB_STR(message,length-1,2)<>'];') THEN
+		wrongData = TRUE
+		RETURN(values)
+	ENDIF
+	FOR i=2 TO length-1 DO 
+		IF ((SUB_STR(message,i,1)=',') OR (i=length-1)) THEN 
+			CNV_STR_REAL(str,realval)
+			WRITE(str,cr)
+			WRITE(realval,cr)
+			values[index]=realval
+			index= index+1
+			str=''
+		ELSE
+			str=str+SUB_STR(message,i,1)
+		ENDIF
+	ENDFOR
+	wrongData = FALSE;
+	RETURN(values)
+END getValues
+
+
+----------------------
+-- COMMAND FEEDBACK --
+----------------------
+
+ROUTINE commandStart(commando:string)
+BEGIN
+	WRITE socket(commando,';started;',cr)
+END commandStart
+
+
+ROUTINE commandEnd(commando:string)
+BEGIN
+	WRITE socket(commando,';ended;',cr)
+END commandEnd
+
+
+ROUTINE cPosInv
+BEGIN
+	WRITE ('Position invalid',cr)
+	WRITE socket('ERROR;Position invalid',cr)
+END cPosInv
+
+
+---------------------
+-- CUSTOM COMMANDS --
+---------------------
+
+ROUTINE myGrabOFF
+BEGIN
+	commandStart('GRABOFF')
+	WRITE('Grab OFF',cr)
+	RDO[1]=TRUE
+	RDO[2]=FALSE
+	commandEnd('GRABOFF');
+END myGrabOFF
+
+
+ROUTINE myGrabON
+BEGIN
+	commandStart('GRABON')
+	WRITE('Grab ON',cr)
+	RDO[1]=FALSE
+	RDO[2]=TRUE
+	commandEnd('GRABON');
+END myGrabON
+
+
+-- MOVE JOINT IN WORLD FRAME -- 
+ROUTINE myMoveJ(data:string)
+VAR
+    XYZwprs : ARRAY[7] OF REAL	-- Containing position, orientation and speed
+    vXYZ : XYZWPR
+    status : integer
+BEGIN
+	commandStart('MOVEJ')
+
+	XYZwprs = getValues(data)	-- Values parsed from main loop
+	vXYZ = CURPOS(0,0)			-- Hack, to avoid configure something
+
+	IF wrongData THEN
+		write SOCKET('MOVE;ERROR, wrong data format');  
+	ELSE 
+		vXYZ.x = XYZwprs[1]		-- x position
+		vXYZ.y = XYZwprs[2]		-- y position
+		vXYZ.z = XYZwprs[3]		-- z position
+		vXYZ.w = XYZwprs[4]		-- x orientation
+		vXYZ.p = XYZwprs[5]		-- y orientation
+		vXYZ.r = XYZwprs[6]		-- z orientation
+		$SPEED = XYZwprs[7]		-- velocity
+		$MOTYPE = JOINT
+
+		MOVE TO vXYZ
+		
+		CHECK_EPOS((vXYZ), $UFRAME, $UTOOL, status)
+		IF (status <> 0) THEN
+			cPosInv
+		ELSE
+			MOVE TO vXYZ
+		ENDIF
+		
+		commandEnd('MOVEJ')
+	ENDIF
+END myMoveJ
+
+
+-- MOVE LINEAR IN WORLD FRAME --
+ROUTINE myMoveL(data:string)
+VAR
+	XYZwprs : ARRAY[7] OF REAL	-- Containing position, orientation and speed
+	vXYZ : XYZWPR
+    status : integer
+BEGIN
+	commandStart('MOVEL')
+
+	XYZwprs = getValues(data)	-- Values parsed from main loop
+    vXYZ = CURPOS(0,0)			-- Hack, to avoid configure something
+
+	IF wrongData THEN
+		write SOCKET('MOVE;ERROR, wrong data format');  
+	ELSE 
+		vXYZ.x = XYZwprs[1]		-- x position
+		vXYZ.y = XYZwprs[2]		-- y position
+		vXYZ.z = XYZwprs[3]		-- z position
+		vXYZ.w = XYZwprs[4]		-- x orientation
+		vXYZ.p = XYZwprs[5]		-- y orientation
+		vXYZ.r = XYZwprs[6]		-- z orientation
+		$SPEED = XYZwprs[7]		-- velocity
+		$MOTYPE = LINEAR
+
+		CHECK_EPOS((vXYZ), $UFRAME, $UTOOL, status)
+		IF (status <> 0) THEN
+			cPosInv
+		ELSE
+			MOVE TO vXYZ
+		ENDIF
+
+		commandEnd('MOVEL')
+	ENDIF
+END myMoveL
+
+
+-- MOVE JOINT RELATIVE --
+ROUTINE myMoveJR(data:string)
+VAR
+	XYZwprs : ARRAY[7] OF REAL	-- Containing position, orientation and speed
+	vXYZ : XYZWPR
+BEGIN
+	commandStart('MOVEJR')
+
+	XYZwprs = getValues(data)	-- Values parsed from main loop
+	--vXYZ = CURPOS(0,0)			-- Hack, to avoid configure something
+
+	IF wrongData THEN
+		write SOCKET('MOVE;ERROR, wrong data format');  
+	ELSE 
+		vXYZ.x = XYZwprs[1]		-- x position
+		vXYZ.y = XYZwprs[2]		-- y position
+		vXYZ.z = XYZwprs[3]		-- z position
+		vXYZ.w = XYZwprs[4]		-- x orientation
+		vXYZ.p = XYZwprs[5]		-- y orientation
+		vXYZ.r = XYZwprs[6]		-- z orientation
+		$SPEED = XYZwprs[7]		-- velocity
+		$MOTYPE = JOINT
+
+		MOVE RELATIVE vXYZ
+
+		commandEnd('MOVEJR')
+	ENDIF
+END myMoveJR
+
+
+-- MOVE LINEAR RELATIVE --
+ROUTINE myMoveLR(data:string)
+VAR
+	XYZwprs : ARRAY[7] OF REAL	-- Containing position, orientation and speed
+	vXYZ : XYZWPR
+BEGIN
+	commandStart('MOVELR')
+
+	XYZwprs = getValues(data)	-- Values parsed from main loop
+	--vXYZ = CURPOS(0,0)			-- Hack, to avoid configure something
+
+	IF wrongData THEN
+		write SOCKET('MOVE;ERROR, wrong data format');  
+	ELSE 
+		vXYZ.x = XYZwprs[1]		-- x position
+		vXYZ.y = XYZwprs[2]		-- y position
+		vXYZ.z = XYZwprs[3]		-- z position
+		vXYZ.w = XYZwprs[4]		-- x orientation
+		vXYZ.p = XYZwprs[5]		-- y orientation
+		vXYZ.r = XYZwprs[6]		-- z orientation
+		$SPEED = XYZwprs[7]		-- velocity
+		$MOTYPE = LINEAR
+
+		MOVE RELATIVE vXYZ
+
+		commandEnd('MOVELR')
+	ENDIF
+END myMoveLR
+
+
+ROUTINE myPosition
+VAR
+	cPos : XYZWPR
+BEGIN
+	cPos = CURPOS(0,0)
+	WRITE socket('[',cPos.x,cPos.y,cPos.z,cPos.w,cPos.p,cPos.r,']',cr)
+END myPosition
+
+
+ROUTINE myTest
+VAR
+	XYZwprs : ARRAY[7] OF REAL	-- Containing position, orientation and speed
+	vXYZ : VECTOR
+BEGIN
+	commandStart('test')
+
+
+	vXYZ.x = 0		-- x position
+	vXYZ.y = 0		-- y position
+	vXYZ.z = 100		-- z position
+	$SPEED = 100		-- velocity
+	$MOTYPE = LINEAR
+
+	MOVE RELATIVE vXYZ
+	commandEnd('test')
+END myTest
+
+----------
+-- ETC. --
+----------
+
+ROUTINE myExit
+BEGIN
+	commandStart('Exiting')
+	WRITE('Exiting Program!',cr)
+	commandEnd('Exiting');
+END myExit
+
+
+------------------
+-- MAIN ROUTINE --
+------------------
+
+ROUTINE mainLoop
+VAR
+	message,commando,data	: string[128]
+	status,i,J : integer
+	connectionOk,commandFound : boolean
+	str: string[5]
+BEGIN
+	connectionOK = TRUE
+	WHILE connectionOk DO
+		READ socket(message)
+		status = io_status(socket)
+
+		IF (status = 0) THEN
+			--Search for command
+			WRITE('Received string: ',message,cr)
+			commandFound = FALSE 
+			i = STR_LEN(message)
+			j = 1
+			WHILE ((NOT commandFound) AND (j<=i)) DO
+				IF(SUB_STR(message,j,1)=';') THEN
+					commando = SUB_STR(message,1,j-1)
+					data = SUB_STR(message,j+1,i-j+1)
+					commandFound = TRUE;
+				ELSE
+					--WRITE(SUB_STR(message,j,1))
+					j = j+ 1
+				ENDIF
+			ENDWHILE
+      
+			IF (NOT commandFound) THEN
+				write SOCKET('ERROR;wrong syntax;')
+			ELSE
+				WRITE('Recieved command: ',commando,cr)
+				commandFound = FALSE
+				IF(commando='GRABON') THEN
+					myGrabON
+					commandFound = TRUE
+				ENDIF
+				IF(commando='test') THEN
+					myTest
+					commandFound = TRUE
+				ENDIF
+				IF(commando='GRABOFF') THEN
+					myGrabOFF
+					commandFound = TRUE
+				ENDIF
+				IF(commando='MOVEJ') THEN
+					myMoveJ(data)
+					commandFound = TRUE
+				ENDIF
+				IF(commando='MOVEL') THEN
+					myMoveL(data)
+					commandFound = TRUE
+				ENDIF
+				IF(commando='MOVELR') THEN
+					myMoveLR(data)
+					commandFound = TRUE
+				ENDIF
+				IF(commando='MOVEJR') THEN
+					myMoveJR(data)
+					commandFound = TRUE
+				ENDIF
+				IF(commando='GETPOS') THEN
+					myPosition
+					commandFound = TRUE
+				ENDIF
+				IF(commando='EXIT') THEN
+					connectionOK=FALSE
+					running = FALSE;
+					commandFound = TRUE
+					myExit
+				ENDIF
+				IF (NOT commandFound) THEN
+					write SOCKET('ERROR;unknown command;')
+				ENDIF
+				DELAY 10
+			ENDIF
+		ELSE
+			connectionOk=FALSE
+		ENDIF
+	ENDWHILE
+END mainLoop
+
+
+----------
+-- MAIN --
+----------
+
+BEGIN
+	initialize
+
+	WHILE running DO
+		waitClient
+		mainLoop
+		closeSocket
+	ENDWHILE
+
+END ROBSERV
