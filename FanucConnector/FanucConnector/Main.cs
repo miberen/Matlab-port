@@ -19,10 +19,10 @@ namespace FanucConnector
 {
     public partial class Main : Form
     {
-        //private readonly IPAddress _hostIpAddress = IPAddress.Parse("192.168.1.25");
-        private readonly IPAddress _hostIpAddress = IPAddress.Parse("127.0.0.1");
-        //private readonly int _hostPort = 59002;
-        private readonly int _hostPort = 8001;
+        private readonly IPAddress _hostIpAddress = IPAddress.Parse("192.168.1.25");
+        //private readonly IPAddress _hostIpAddress = IPAddress.Parse("127.0.0.1");
+        private readonly int _hostPort = 59002;
+        //private readonly int _hostPort = 8001;
         private TcpClient _client;
         private NetworkStream _hostStream;
         public Main()
@@ -138,15 +138,24 @@ namespace FanucConnector
 
         private void btn_getPos_Click(object sender, EventArgs e)
         {
-            foreach (double dbl in RobotGetPos())
-            {
+            List<double> positions = RobotGetPos();
+            foreach (double dbl in positions)
+            {             
                 rTBox_main.AppendText(dbl.ToString() + "\n");
             }
+            
         }
 
         private void btn_moveJoint_Click(object sender, EventArgs e)
         {
-            RobotMoveJoint(100, 100, 100, 100, 100, 100, 100);
+            RobotMoveJoint(double.Parse(txt_coord0.Text), 
+                           double.Parse(txt_coord1.Text), 
+                           double.Parse(txt_coord2.Text), 
+                           double.Parse(txt_coord3.Text), 
+                           double.Parse(txt_coord4.Text), 
+                           double.Parse(txt_coord5.Text), 
+                           double.Parse(txt_speed.Text));
+            RobotGetPos();
         }
 
         #endregion
@@ -171,13 +180,40 @@ namespace FanucConnector
                 position.Add(double.Parse(strs, new CultureInfo("en-US")));
                 //position.Add(Convert.ToDouble(strs, new CultureInfo("en-US")));
             }
+
+            txt_coord0.Text = position[0].ToString();
+            txt_coord1.Text = position[1].ToString();
+            txt_coord2.Text = position[2].ToString();
+            txt_coord3.Text = position[3].ToString();
+            txt_coord4.Text = position[4].ToString();
+            txt_coord5.Text = position[5].ToString();
+
             return position;
         }
 
         void RobotMoveJoint(double x, double y, double z, double w, double p, double r, double speed)
         {
-            RobotSend("MOVEJ;[" + x+ "," + y + "," + z + "," + w + "," + p + "," + r + "," + speed + "];");
+            const string whatTheFuck = ".#################################;-.##################################;0";
+#if LOG
+            rTBox_main.AppendText("MOVEJ;[" + x.ToString(whatTheFuck, new CultureInfo("en-US")) + "," + 
+                                              y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," + 
+                                              z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," + 
+                                              w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," + 
+                                              p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                              r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," + 
+                                              speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
+#endif         
+
+            RobotSend("MOVEJ;[" + x.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                              y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                              z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                              w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                              p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                              r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                              speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
             RecieveData();
+            RecieveData();
+            
         }
     }
 }
