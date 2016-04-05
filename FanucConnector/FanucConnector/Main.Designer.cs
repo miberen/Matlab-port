@@ -53,6 +53,8 @@
             this.txt_speed = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.btn_down = new System.Windows.Forms.Button();
+            this.btn_up = new System.Windows.Forms.Button();
             this.btn_listRemove = new System.Windows.Forms.Button();
             this.btn_listAdd = new System.Windows.Forms.Button();
             this.lbl_isValidated = new System.Windows.Forms.Label();
@@ -288,6 +290,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btn_down);
+            this.groupBox2.Controls.Add(this.btn_up);
             this.groupBox2.Controls.Add(this.btn_listRemove);
             this.groupBox2.Controls.Add(this.btn_listAdd);
             this.groupBox2.Controls.Add(this.lbl_isValidated);
@@ -301,6 +305,26 @@
             this.groupBox2.TabIndex = 21;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Orders";
+            // 
+            // btn_down
+            // 
+            this.btn_down.Location = new System.Drawing.Point(275, 184);
+            this.btn_down.Name = "btn_down";
+            this.btn_down.Size = new System.Drawing.Size(42, 23);
+            this.btn_down.TabIndex = 8;
+            this.btn_down.Text = "↓";
+            this.btn_down.UseVisualStyleBackColor = true;
+            this.btn_down.Click += new System.EventHandler(this.btn_down_Click);
+            // 
+            // btn_up
+            // 
+            this.btn_up.Location = new System.Drawing.Point(275, 155);
+            this.btn_up.Name = "btn_up";
+            this.btn_up.Size = new System.Drawing.Size(42, 23);
+            this.btn_up.TabIndex = 7;
+            this.btn_up.Text = "↑";
+            this.btn_up.UseVisualStyleBackColor = true;
+            this.btn_up.Click += new System.EventHandler(this.btn_up_Click);
             // 
             // btn_listRemove
             // 
@@ -451,6 +475,8 @@
         private System.Windows.Forms.Button btn_validate;
         private System.Windows.Forms.Button btn_listRemove;
         private System.Windows.Forms.Button btn_listAdd;
+        private System.Windows.Forms.Button btn_down;
+        private System.Windows.Forms.Button btn_up;
     }
 }
 

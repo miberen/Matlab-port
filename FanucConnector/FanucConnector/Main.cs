@@ -26,12 +26,12 @@ namespace FanucConnector
         private TcpClient _client;
         private NetworkStream _hostStream;
         private List<Figure> figures;
-        private List<Figure> orders;  
+        private readonly List<Figure> _orders;  
 
         public Main()
         {
             InitializeComponent(); 
-            orders = new List<Figure>();      
+            _orders = new List<Figure>();      
             FillFigures();
         }
 
@@ -110,12 +110,12 @@ namespace FanucConnector
 
         private void FillFigures()
         {
-            orders.Add(new Figure(Figure.Character.Homer));
-            orders.Add(new Figure(Figure.Character.Marge));
-            orders.Add(new Figure(Figure.Character.Bart));
-            orders.Add(new Figure(Figure.Character.Lisa));
-            orders.Add(new Figure(Figure.Character.Maggie));
-            lb_figures.Items.AddRange(orders.ToArray());
+            _orders.Add(new Figure(Figure.Character.Homer));
+            _orders.Add(new Figure(Figure.Character.Marge));
+            _orders.Add(new Figure(Figure.Character.Bart));
+            _orders.Add(new Figure(Figure.Character.Lisa));
+            _orders.Add(new Figure(Figure.Character.Maggie));
+            lb_figures.Items.AddRange(_orders.ToArray());
         }
         #endregion
 
@@ -313,16 +313,6 @@ namespace FanucConnector
             lb_orders.Items.Remove(lb_orders.SelectedItem);
         }
 
-        private void btn_build_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btn_validate_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void lb_figures_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             int index = this.lb_figures.IndexFromPoint(e.Location);
@@ -341,6 +331,37 @@ namespace FanucConnector
             }
         }
 
+        private void btn_down_Click(object sender, EventArgs e)
+        {
+            int selectedIndex = lb_orders.SelectedIndex;
+            if (selectedIndex < lb_orders.Items.Count - 1 & selectedIndex != -1)
+            {
+                lb_orders.Items.Insert(selectedIndex + 2, lb_orders.Items[selectedIndex]);
+                lb_orders.Items.RemoveAt(selectedIndex);
+                lb_orders.SelectedIndex = selectedIndex + 1;
+
+            }
+        }
+
+        private void btn_up_Click(object sender, EventArgs e)
+        {
+            int selectedIndex = lb_orders.SelectedIndex;
+            if (selectedIndex > 0)
+            {
+                lb_orders.Items.Insert(selectedIndex - 1, lb_orders.Items[selectedIndex]);
+                lb_orders.Items.RemoveAt(selectedIndex + 1);
+                lb_orders.SelectedIndex = selectedIndex - 1;
+            }
+        }
+        private void btn_build_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btn_validate_Click(object sender, EventArgs e)
+        {
+
+        }
         #endregion
 
     }
