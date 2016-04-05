@@ -34,3 +34,12 @@ C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\D
 C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
 C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
 C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
+C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
