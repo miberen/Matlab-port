@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.gBox_networking = new System.Windows.Forms.GroupBox();
             this.btn_testSend = new System.Windows.Forms.Button();
             this.btn_disconnect = new System.Windows.Forms.Button();
@@ -63,10 +64,13 @@
             this.lb_orders = new System.Windows.Forms.ListBox();
             this.lb_figures = new System.Windows.Forms.ListBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.img_camfeed = new Emgu.CV.UI.ImageBox();
+            this.txt_coordinates = new System.Windows.Forms.TextBox();
             this.gBox_networking.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.img_camfeed)).BeginInit();
             this.SuspendLayout();
             // 
             // gBox_networking
@@ -418,11 +422,31 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Movement";
             // 
+            // img_camfeed
+            // 
+            this.img_camfeed.Location = new System.Drawing.Point(860, 12);
+            this.img_camfeed.Name = "img_camfeed";
+            this.img_camfeed.Size = new System.Drawing.Size(640, 360);
+            this.img_camfeed.TabIndex = 2;
+            this.img_camfeed.TabStop = false;
+            this.img_camfeed.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.img_camfeed_MouseDoubleClick);
+            this.img_camfeed.MouseMove += new System.Windows.Forms.MouseEventHandler(this.img_camfeed_MouseMove);
+            // 
+            // txt_coordinates
+            // 
+            this.txt_coordinates.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txt_coordinates.Location = new System.Drawing.Point(861, 372);
+            this.txt_coordinates.Name = "txt_coordinates";
+            this.txt_coordinates.Size = new System.Drawing.Size(639, 29);
+            this.txt_coordinates.TabIndex = 23;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(866, 420);
+            this.ClientSize = new System.Drawing.Size(1524, 681);
+            this.Controls.Add(this.txt_coordinates);
+            this.Controls.Add(this.img_camfeed);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -436,7 +460,9 @@
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.img_camfeed)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -477,6 +503,8 @@
         private System.Windows.Forms.Button btn_listAdd;
         private System.Windows.Forms.Button btn_down;
         private System.Windows.Forms.Button btn_up;
+        private Emgu.CV.UI.ImageBox img_camfeed;
+        private System.Windows.Forms.TextBox txt_coordinates;
     }
 }
 

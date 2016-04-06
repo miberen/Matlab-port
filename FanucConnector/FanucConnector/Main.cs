@@ -14,6 +14,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.UI;
 
 namespace FanucConnector
 {
@@ -26,13 +29,47 @@ namespace FanucConnector
         private TcpClient _client;
         private NetworkStream _hostStream;
         private readonly List<Figure> _figures;
-        private List<Figure> _orders = new List<Figure>();  
+        private List<Figure> _orders = new List<Figure>();
+
+        private Emgu.CV.Capture _capture = null;
+        static int offsetX, offsetY, horizontalScrollBarValue, verticalScrollBarValue;
+        Mat frame = new Mat();
 
         public Main()
         {
             InitializeComponent(); 
             _figures = new List<Figure>();      
             FillFigures();
+
+            img_camfeed.FunctionalMode = ImageBox.FunctionalModeOption.Everything;
+            CvInvoke.UseOpenCL = false;
+            try
+            {
+                // _capture = new Capture();
+                //  _capture.SetCaptureProperty(CapProp.Settings,0);
+                //  _capture.ImageGrabbed += ProcessFrame;
+                frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im0.jpg", LoadImageType.AnyColor);
+                Application.Idle += ProcessFrame;
+
+            }
+
+            catch (NullReferenceException excpt)
+            {
+                MessageBox.Show(excpt.Message);
+            }
+        }
+
+        private void ProcessFrame(object sender, EventArgs e)
+        {
+
+            // _capture.Retrieve(frame, 0);
+
+
+            //CvInvoke.PutText(frame, "X-Coordinate " + offsetX, new System.Drawing.Point(50, 20), FontFace.HersheyPlain, 1.5, new Bgr(155, 50, 50).MCvScalar);
+            //CvInvoke.PutText(frame, "Y-Coordinate " + offsetY, new System.Drawing.Point(50, 40), FontFace.HersheyPlain, 1.5, new Bgr(155, 50, 50).MCvScalar);
+
+            img_camfeed.Image = frame;
+
         }
 
         #region Figure Related
@@ -376,5 +413,47 @@ namespace FanucConnector
         }
         #endregion
 
+        private void img_camfeed_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int mouseX = (int)(e.Location.X / img_camfeed.ZoomScale);
+            int mouseY = (int)(e.Location.Y / img_camfeed.ZoomScale);
+            int horizontalScroll = img_camfeed.HorizontalScrollBar.Visible ? (int)img_camfeed.HorizontalScrollBar.Value : 0;
+            int verticalScroll = img_camfeed.VerticalScrollBar.Visible ? (int)img_camfeed.VerticalScrollBar.Value : 0;
+
+            int x, y;
+            x = mouseX + horizontalScroll;
+            y = mouseY + verticalScroll;
+
+            ScreenToWorld_Mapping(x, y);
+        }
+
+        private void img_camfeed_MouseMove(object sender, MouseEventArgs e)
+        {
+            offsetX = (int)(e.Location.X / img_camfeed.ZoomScale);
+            offsetY = (int)(e.Location.Y / img_camfeed.ZoomScale);
+            horizontalScrollBarValue = img_camfeed.HorizontalScrollBar.Visible ? (int)img_camfeed.HorizontalScrollBar.Value : 0;
+            verticalScrollBarValue = img_camfeed.VerticalScrollBar.Visible ? (int)img_camfeed.VerticalScrollBar.Value : 0;
+            txt_coordinates.Text = Convert.ToString(offsetX + horizontalScrollBarValue) + "." + Convert.ToString(offsetY + verticalScrollBarValue + "  ImgSize: " + frame.Size);
+        }
+
+        private void ScreenToWorld_Mapping(int x, int y)
+        {
+            double _x = -354 - (x * 1.58);
+            double _y = 531 - (y * 1.76);
+
+            RobotMoveJoint(_x, _y, 50, -165, 0, 0, 200);
+        }
+
+        private void ScreenToWorld(int x, int y)
+        {
+
+        }
+
+
+        private void ReleaseData()
+        {
+            if (_capture != null)
+                _capture.Dispose();
+        }
     }
 }
