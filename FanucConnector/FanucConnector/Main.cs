@@ -360,6 +360,7 @@ namespace FanucConnector
 
         private void btn_validate_Click(object sender, EventArgs e)
         {
+            _orders.Clear();
             foreach (object obj in lb_orders.Items)
             {
                 _orders.Add((Figure)obj);
