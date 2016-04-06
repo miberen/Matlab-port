@@ -13,10 +13,13 @@ using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
 using Emgu.CV.UI;
+using Emgu.CV.Util;
 
 namespace FanucConnector
 {
@@ -33,7 +36,8 @@ namespace FanucConnector
 
         private Emgu.CV.Capture _capture = null;
         static int offsetX, offsetY, horizontalScrollBarValue, verticalScrollBarValue;
-        Mat frame = new Mat();
+        private Mat frame = new Mat();
+        private Mat frameHSV = new Mat();
 
         public Main()
         {
@@ -45,10 +49,12 @@ namespace FanucConnector
             CvInvoke.UseOpenCL = false;
             try
             {
-                // _capture = new Capture();
-                //  _capture.SetCaptureProperty(CapProp.Settings,0);
-                //  _capture.ImageGrabbed += ProcessFrame;
-                frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im0.jpg", LoadImageType.AnyColor);
+                _capture = new Emgu.CV.Capture(CaptureType.DShow);
+                _capture.SetCaptureProperty(CapProp.FrameWidth, 640);
+                _capture.SetCaptureProperty(CapProp.FrameHeight, 360);
+                _capture.SetCaptureProperty(CapProp.Settings, 0);
+                _capture.ImageGrabbed += ProcessFrame;
+                //frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im0.jpg", LoadImageType.AnyColor);
                 Application.Idle += ProcessFrame;
 
             }
@@ -62,11 +68,12 @@ namespace FanucConnector
         private void ProcessFrame(object sender, EventArgs e)
         {
 
-            // _capture.Retrieve(frame, 0);
-
+            _capture.Retrieve(frame, 0);
+            CvInvoke.CvtColor(frame,frameHSV, ColorConversion.Bgr2Hsv);
 
             //CvInvoke.PutText(frame, "X-Coordinate " + offsetX, new System.Drawing.Point(50, 20), FontFace.HersheyPlain, 1.5, new Bgr(155, 50, 50).MCvScalar);
             //CvInvoke.PutText(frame, "Y-Coordinate " + offsetY, new System.Drawing.Point(50, 40), FontFace.HersheyPlain, 1.5, new Bgr(155, 50, 50).MCvScalar);
+            colorFilter(frameHSV, 105, 125, 150, 255, 25, 255, false);
 
             img_camfeed.Image = frame;
 
@@ -214,7 +221,7 @@ namespace FanucConnector
 
         List<double> RobotGetPos()
         {
-
+            
             RobotSend("GETPOS;");
 
             while (!_hostStream.DataAvailable) { }
@@ -438,10 +445,10 @@ namespace FanucConnector
 
         private void ScreenToWorld_Mapping(int x, int y)
         {
-            double _x = -354 - (x * 1.58);
-            double _y = 531 - (y * 1.76);
+            double _x = -344 - (x * 1.664);
+            double _y = 530 - (y * 1.664);
 
-            RobotMoveJoint(_x, _y, 50, -165, 0, 0, 200);
+            RobotMoveJoint(_y, _x, 0, -165, 0, 90, 200);
         }
 
         private void ScreenToWorld(int x, int y)
@@ -455,5 +462,112 @@ namespace FanucConnector
             if (_capture != null)
                 _capture.Dispose();
         }
+
+        void colorFilter(Mat frameHSV, float minHue, float maxHue, float minSat, float maxSat, float minVal, float maxVal, bool red)
+        {
+            Mat element = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(7, 7), new Point(3, 3));
+
+            Image<Hsv, Byte>  frameHSV_3 = frameHSV.ToImage<Hsv, Byte>();
+            Image<Gray, Byte>[] channels = frameHSV_3.Split();  
+            Image<Gray, Byte> imghue = channels[0];
+            Image<Gray, Byte> imgsat = channels[1];
+            Image<Gray, Byte> imgval = channels[2];
+
+            double[] min, max;
+            Point[] minLocation, maxLocation;
+
+            if (red == true)
+            {
+                Image<Gray, Byte> aux = imghue.InRange(new Gray(minHue), new Gray(maxHue));
+                imghue = imghue.InRange(new Gray(180 - maxHue), new Gray(180));
+                imghue = imghue.Or(aux);
+            }
+            else
+            {
+                imghue = imghue.InRange(new Gray(minHue), new Gray(maxHue));
+            }
+
+            imgsat = imgsat.InRange(new Gray(minSat), new Gray(maxSat));
+            imgval = imgval.InRange(new Gray(minVal), new Gray(maxVal));
+            imghue = imghue.And(imgsat);
+            imghue = imghue.And(imgval);
+            imghue = imghue.MorphologyEx(MorphOp.Close, element, new Point(3,3), 1, BorderType.Default,  new MCvScalar(1));
+            imghue.MinMax(out min, out max, out minLocation, out maxLocation);
+            imghue = (imghue/max[0])*255;
+
+            CvInvoke.NamedWindow("Some window", NamedWindowType.AutoSize);
+            CvInvoke.Imshow("Some window", imghue);
+
+        }
+
+        //void blobAnalysis(Mat binaryIm, Mat frameHSV)
+        //{
+        //    int largest_area = 0;
+        //    int largest_contour_index = 0;
+        //    Rectangle bounding_rect = new Rectangle();
+        //    Rectangle bounding_rectDef = new Rectangle();
+
+        //    VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+        //    Mat hierarchy = new Mat();
+
+        //    Mat conBin = binaryIm.Clone();
+        //    CvInvoke.FindContours(conBin, contours, hierarchy, RetrType.Ccomp, ChainApproxMethod.ChainApproxSimple);
+
+        //    for (int i = 0; i < contours.Size; i++) // iterate through each contour.
+        //    {
+        //        double a = CvInvoke.ContourArea(contours[i], false);  //  Find the area of contour
+        //        bounding_rect = CvInvoke.BoundingRectangle(contours[i]);
+        //        int totElements = bounding_rect.Width * bounding_rect.Height;
+        //        Image<Gray, Byte> sausage = binaryIm.ToImage<Gray, Byte>();
+        //        sausage.ROI = bounding_rect;
+        //        sausage.get
+        //            binaryIm(bounding_rect))[0] / totElements) * 0.3921;
+
+        //        rectangle(frameHSV, bounding_rect, Scalar(0, 0, 0), 2, 8, 0);
+        //        cout << "Contours: " << contours[i] << endl;
+        //        cout << "i: " << i << "; bounding: " << bounding_rect << endl;
+        //        cout << "Percentage: " << Perc << endl;
+
+        //        //double RecRatio = bounding_rect.size().width/bounding_rect.size().height;
+
+
+        //        if ((Perc > 50) && (totElements > 100))
+        //        {
+        //            Point center = Point(bounding_rect.x + (bounding_rect.size().width / 2), bounding_rect.y + (bounding_rect.size().height / 2));
+        //            int minX = 100000;
+        //            int minY = 100000;
+        //            Point coord1, coord2;
+
+        //            for (int j = 0; j < contours[i].size(); j++)
+        //            {
+        //                if (contours[i][j].x < minX)
+        //                {
+        //                    minX = contours[i][j].x;
+        //                    coord1 = contours[i][j];
+        //                }
+        //                if (contours[i][j].y < minY)
+        //                {
+        //                    minY = contours[i][j].y;
+        //                    coord2 = contours[i][j];
+        //                }
+        //            }
+
+        //            line(frameHSV, coord1, Point(coord1.x, coord2.y), Scalar(255, 255, 255), 2, 8, 0);
+        //            line(frameHSV, coord1, coord2, Scalar(255, 255, 255), 2, 8, 0);
+
+        //            Point SlopeA = Point(coord1.x, coord2.y) - coord1;
+        //            Point SlopeB = (coord2 - coord1);
+
+        //            double angle = atan2(SlopeB.x, SlopeB.y) - atan2(SlopeA.x, SlopeA.y);
+        //            angle = angle * (180 / CV_PI);
+
+        //            bounding_rectDef = boundingRect(contours[i]);
+        //        }
+        //    }
+        //    imshow("Found Largest Contour", frameHSV);
+        //}
+
+
+
     }
 }
