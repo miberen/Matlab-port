@@ -25,13 +25,13 @@ namespace FanucConnector
         //private readonly int _hostPort = 8001;
         private TcpClient _client;
         private NetworkStream _hostStream;
-        private List<Figure> figures;
-        private readonly List<Figure> _orders;  
+        private readonly List<Figure> _figures;
+        private List<Figure> _orders = new List<Figure>();  
 
         public Main()
         {
             InitializeComponent(); 
-            _orders = new List<Figure>();      
+            _figures = new List<Figure>();      
             FillFigures();
         }
 
@@ -110,12 +110,12 @@ namespace FanucConnector
 
         private void FillFigures()
         {
-            _orders.Add(new Figure(Figure.Character.Homer));
-            _orders.Add(new Figure(Figure.Character.Marge));
-            _orders.Add(new Figure(Figure.Character.Bart));
-            _orders.Add(new Figure(Figure.Character.Lisa));
-            _orders.Add(new Figure(Figure.Character.Maggie));
-            lb_figures.Items.AddRange(_orders.ToArray());
+            _figures.Add(new Figure(Figure.Character.Homer));
+            _figures.Add(new Figure(Figure.Character.Marge));
+            _figures.Add(new Figure(Figure.Character.Bart));
+            _figures.Add(new Figure(Figure.Character.Lisa));
+            _figures.Add(new Figure(Figure.Character.Maggie));
+            lb_figures.Items.AddRange(_figures.ToArray());
         }
         #endregion
 
@@ -360,7 +360,18 @@ namespace FanucConnector
 
         private void btn_validate_Click(object sender, EventArgs e)
         {
+            foreach (object obj in lb_orders.Items)
+            {
+                _orders.Add((Figure)obj);
+            }
 
+            List<Color> orderColors = _orders.SelectMany(fig => fig.Color).ToList();
+#if LOG
+            foreach (Color color in orderColors)
+            {
+                rTBox_main.AppendText(color.ToString() + "\n");
+            }
+#endif
         }
         #endregion
 
