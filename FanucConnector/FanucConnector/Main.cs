@@ -14,12 +14,15 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
+using System.Windows.Forms.VisualStyles;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.UI;
 using Emgu.CV.Util;
+using BorderType = Emgu.CV.CvEnum.BorderType;
 
 namespace FanucConnector
 {
@@ -33,16 +36,28 @@ namespace FanucConnector
         private NetworkStream _hostStream;
         private readonly List<Figure> _figures;
         private List<Figure> _orders = new List<Figure>();
+        private List<Brick> _availibleBricks = new List<Brick>();
 
         private Emgu.CV.Capture _capture = null;
         static int offsetX, offsetY, horizontalScrollBarValue, verticalScrollBarValue;
         private Mat frame = new Mat();
+        private Mat undistFrame = new Mat();
         private Mat frameHSV = new Mat();
+        private bool _orderApproved;
+        private bool _isCalibrated = false;
+        
+
+
+        //Camcalib stuff
+        private Mat _cameraMatrix;
+        private Mat _distCoeffs;
+
+
 
         public Main()
         {
-            InitializeComponent(); 
-            _figures = new List<Figure>();      
+            InitializeComponent();
+            _figures = new List<Figure>();
             FillFigures();
 
             img_camfeed.FunctionalMode = ImageBox.FunctionalModeOption.Everything;
@@ -50,11 +65,13 @@ namespace FanucConnector
             try
             {
                 _capture = new Emgu.CV.Capture(CaptureType.DShow);
-                _capture.SetCaptureProperty(CapProp.FrameWidth, 640);
-                _capture.SetCaptureProperty(CapProp.FrameHeight, 360);
+                _capture.SetCaptureProperty(CapProp.FrameWidth, 1280);
+                _capture.SetCaptureProperty(CapProp.FrameHeight, 720);
                 _capture.SetCaptureProperty(CapProp.Settings, 0);
                 _capture.ImageGrabbed += ProcessFrame;
+
                 //frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im0.jpg", LoadImageType.AnyColor);
+                //CvInvoke.Undistort(frame, frame, _cameraMatrix, _distCoeffs);
                 Application.Idle += ProcessFrame;
 
             }
@@ -69,17 +86,55 @@ namespace FanucConnector
         {
 
             _capture.Retrieve(frame, 0);
-            CvInvoke.CvtColor(frame,frameHSV, ColorConversion.Bgr2Hsv);
+            frame.CopyTo(undistFrame);
+           if (_isCalibrated)
+            CvInvoke.Undistort(frame, undistFrame, _cameraMatrix, _distCoeffs);
+            CvInvoke.CvtColor(undistFrame, frameHSV, ColorConversion.Bgr2Hsv);
 
             //CvInvoke.PutText(frame, "X-Coordinate " + offsetX, new System.Drawing.Point(50, 20), FontFace.HersheyPlain, 1.5, new Bgr(155, 50, 50).MCvScalar);
             //CvInvoke.PutText(frame, "Y-Coordinate " + offsetY, new System.Drawing.Point(50, 40), FontFace.HersheyPlain, 1.5, new Bgr(155, 50, 50).MCvScalar);
-            colorFilter(frameHSV, 105, 125, 150, 255, 25, 255, false);
-
-            img_camfeed.Image = frame;
+            //colorFilter(frameHSV, 105, 125, 150, 255, 25, 255, false);
+            //colorFilter(frameHSV, 12, 18, 170, 255, 220, 255, false);
+            img_camfeed.Image = undistFrame;
 
         }
 
         #region Figure Related
+
+        private struct ColorFilt
+        {
+            private readonly List<object> _filter;
+
+            public ColorFilt(List<object> input)
+            {
+                _filter = input;
+            }
+
+            public ColorFilt(Color color)
+            {
+                if (color == Color.Blue)
+                    _filter = new List<object> {105F, 125f, 150f, 255f, 25f, 255f, false};
+                else if (color == Color.Yellow)
+                    _filter = new List<object> {12f, 18f, 170f, 255f, 220f, 255f, false};
+                else if (color == Color.Orange)
+                    _filter = new List<object> {5f, 10f, 200f, 255f, 200f, 255f, false};
+                else if (color == Color.Green)
+                    _filter = new List<object> {27f, 37f, 170f, 255f, 140f, 255f, false};
+                else if (color == Color.White)
+                    _filter = new List<object> {0, 255, 0, 63, 220, 255, false};
+                else
+                {
+                    MessageBox.Show(@"Color not found");
+                    _filter = null;
+                }
+            }
+
+            public List<object> Filter()
+            {
+                return _filter;
+            }
+        }
+
         private class Figure
         {
             public Figure(Character chararacter)
@@ -97,6 +152,7 @@ namespace FanucConnector
                 Lisa,
                 Maggie
             }
+
             public Character Type;
             public Point Point;
             public List<Color> Color;
@@ -136,19 +192,63 @@ namespace FanucConnector
             {
                 switch (Type)
                 {
-                        case Character.Homer:
+                    case Character.Homer:
                         return "Homer";
-                        case Character.Marge:
+                    case Character.Marge:
                         return "Marge";
-                        case Character.Bart:
+                    case Character.Bart:
                         return "Bart";
-                        case Character.Lisa:
+                    case Character.Lisa:
                         return "Lisa";
-                        case Character.Maggie:
+                    case Character.Maggie:
                         return "Maggie";
                     default:
                         return null;
                 }
+            }
+        }
+
+        private class Brick : IEquatable<Brick>
+        {
+            private Color _color;
+            private Point _position;
+            private double _angle;
+
+            public Brick(Color color, Point position, double angle)
+            {
+                _color = color;
+                _position = position;
+                _angle = angle;
+            }
+
+            public Color Color
+            {
+                get { return _color; }
+                set { _color = value; }
+            }
+
+            public Point Position
+            {
+                get { return _position; }
+                set { _position = value; }
+            }
+
+            public double Angle
+            {
+                get { return _angle; }
+                set { _angle = value; }
+            }
+                
+
+            public override string ToString()
+            {
+                return "Brick: Color: " + _color.ToString() + " Position: " + _position.ToString() + " Angle: " + _angle.ToString();
+            }
+
+            public bool Equals(Brick other)
+            {
+                // Would still want to check for null etc. first.
+                return this._color == other._color;
             }
         }
 
@@ -161,9 +261,11 @@ namespace FanucConnector
             _figures.Add(new Figure(Figure.Character.Maggie));
             lb_figures.Items.AddRange(_figures.ToArray());
         }
+
         #endregion
 
         #region Send/Recieve
+
         private async void Connect()
         {
             rTBox_main.AppendText("Attemtping to connect to: " + _hostIpAddress + ":" + _hostPort + "\n");
@@ -205,12 +307,14 @@ namespace FanucConnector
             {
                 rTBox_main.AppendText("CanWrite is false! \n");
             }
-            
+
         }
 
         private void RecieveData()
         {
-            while (!_hostStream.DataAvailable) { }
+            while (!_hostStream.DataAvailable)
+            {
+            }
 
             byte[] inStream = new byte[1024];
             _hostStream.Read(inStream, 0, inStream.Length);
@@ -221,10 +325,12 @@ namespace FanucConnector
 
         List<double> RobotGetPos()
         {
-            
+
             RobotSend("GETPOS;");
 
-            while (!_hostStream.DataAvailable) { }
+            while (!_hostStream.DataAvailable)
+            {
+            }
 
             byte[] inStream = new byte[1024];
             _hostStream.Read(inStream, 0, inStream.Length);
@@ -232,7 +338,9 @@ namespace FanucConnector
             rTBox_main.AppendText("Data Recieved:" + returnData + "\n");
             List<double> position = new List<double>();
 
-            IEnumerable<string> strings = returnData.Split(new[] { ' ', ']', '[' }, StringSplitOptions.RemoveEmptyEntries).Where(s => !string.IsNullOrWhiteSpace(s) && s.Length < 50);
+            IEnumerable<string> strings =
+                returnData.Split(new[] {' ', ']', '['}, StringSplitOptions.RemoveEmptyEntries)
+                    .Where(s => !string.IsNullOrWhiteSpace(s) && s.Length < 50);
             foreach (string strs in strings)
             {
                 //rTBox_main.AppendText(strs.Length + "\n");
@@ -255,21 +363,21 @@ namespace FanucConnector
             const string whatTheFuck = ".#################################;-.##################################;0";
 #if LOG
             rTBox_main.AppendText("MOVEJ;[" + x.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
-#endif         
+                                  y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                  z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                  w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                  p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                  r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                                  speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
+#endif
 
             RobotSend("MOVEJ;[" + x.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                              speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
+                      y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                      z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                      w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                      p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                      r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
+                      speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
             RecieveData();
             RecieveData();
 
@@ -328,21 +436,21 @@ namespace FanucConnector
         {
             List<double> positions = RobotGetPos();
             foreach (double dbl in positions)
-            {             
+            {
                 rTBox_main.AppendText(dbl.ToString() + "\n");
             }
-            
+
         }
 
         private void btn_moveJoint_Click(object sender, EventArgs e)
         {
-            RobotMoveJoint(double.Parse(txt_coord0.Text), 
-                           double.Parse(txt_coord1.Text), 
-                           double.Parse(txt_coord2.Text), 
-                           double.Parse(txt_coord3.Text), 
-                           double.Parse(txt_coord4.Text), 
-                           double.Parse(txt_coord5.Text), 
-                           double.Parse(txt_speed.Text));
+            RobotMoveJoint(double.Parse(txt_coord0.Text),
+                double.Parse(txt_coord1.Text),
+                double.Parse(txt_coord2.Text),
+                double.Parse(txt_coord3.Text),
+                double.Parse(txt_coord4.Text),
+                double.Parse(txt_coord5.Text),
+                double.Parse(txt_speed.Text));
             RobotGetPos();
         }
 
@@ -397,6 +505,7 @@ namespace FanucConnector
                 lb_orders.SelectedIndex = selectedIndex - 1;
             }
         }
+
         private void btn_build_Click(object sender, EventArgs e)
         {
 
@@ -405,27 +514,87 @@ namespace FanucConnector
         private void btn_validate_Click(object sender, EventArgs e)
         {
             _orders.Clear();
+            _availibleBricks.Clear();
+            
             foreach (object obj in lb_orders.Items)
             {
-                _orders.Add((Figure)obj);
+                _orders.Add((Figure) obj);
             }
 
             List<Color> orderColors = _orders.SelectMany(fig => fig.Color).ToList();
-#if LOG
-            foreach (Color color in orderColors)
+
+            HashSet<Color> uniques = new HashSet<Color>(orderColors);
+
+            foreach (Color col in uniques)
             {
-                rTBox_main.AppendText(color.ToString() + "\n");
+                List<object> filter = new ColorFilt(col).Filter();
+
+                colorFilter(frameHSV, col, Convert.ToSingle(filter[0]), Convert.ToSingle(filter[1]), Convert.ToSingle(filter[2]), Convert.ToSingle(filter[3]), Convert.ToSingle(filter[4]), Convert.ToSingle(filter[5]), false);
             }
-#endif
+
+            foreach (var brick in _availibleBricks)
+            {
+                rTBox_main.AppendText(brick.ToString() + "\n");
+            }
+
+            List<Color> availibleCols = _availibleBricks.Select(brick => brick.Color).ToList();
+            var uniquecols = orderColors.Distinct();
+            int failed = 0;
+            foreach (var color in uniquecols)
+            {
+                var amountordered = orderColors.Count(x => x == color);
+                var amountAvailable = availibleCols.Count(x => x == color);
+                if (amountordered > amountAvailable)
+                {
+                    rTBox_main.AppendText("Not enough: " + color.ToString() +"\n");
+                    failed++;
+                }
+                else
+                    rTBox_main.AppendText("Enough " + color.ToString() + "\n");
+            }
+
+            if (failed > 0)
+            {
+                rTBox_main.AppendText("Order is not approved - Missing bricks\n");
+                _orderApproved = false;
+                lbl_isValidated.Text = @"False";
+            }
+            else
+            {
+                rTBox_main.AppendText("Order is approved - prepping for assembly\n");
+                _orderApproved = true;
+                lbl_isValidated.Text = @"True";
+            }
+
         }
+
+        private void btn_calibrate_Click(object sender, EventArgs e)
+        {
+            using (var calibrate = new Calibrator())
+            {
+                var result = calibrate.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    _cameraMatrix = calibrate.CameraMatrix;
+                    _distCoeffs = calibrate.DistCoeffs;
+                    _isCalibrated = true;
+                    calibrate.Close();
+
+                }
+            }
+
+        }
+
         #endregion
 
         private void img_camfeed_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            int mouseX = (int)(e.Location.X / img_camfeed.ZoomScale);
-            int mouseY = (int)(e.Location.Y / img_camfeed.ZoomScale);
-            int horizontalScroll = img_camfeed.HorizontalScrollBar.Visible ? (int)img_camfeed.HorizontalScrollBar.Value : 0;
-            int verticalScroll = img_camfeed.VerticalScrollBar.Visible ? (int)img_camfeed.VerticalScrollBar.Value : 0;
+            int mouseX = (int) (e.Location.X/img_camfeed.ZoomScale);
+            int mouseY = (int) (e.Location.Y/img_camfeed.ZoomScale);
+            int horizontalScroll = img_camfeed.HorizontalScrollBar.Visible
+                ? (int) img_camfeed.HorizontalScrollBar.Value
+                : 0;
+            int verticalScroll = img_camfeed.VerticalScrollBar.Visible ? (int) img_camfeed.VerticalScrollBar.Value : 0;
 
             int x, y;
             x = mouseX + horizontalScroll;
@@ -436,17 +605,22 @@ namespace FanucConnector
 
         private void img_camfeed_MouseMove(object sender, MouseEventArgs e)
         {
-            offsetX = (int)(e.Location.X / img_camfeed.ZoomScale);
-            offsetY = (int)(e.Location.Y / img_camfeed.ZoomScale);
-            horizontalScrollBarValue = img_camfeed.HorizontalScrollBar.Visible ? (int)img_camfeed.HorizontalScrollBar.Value : 0;
-            verticalScrollBarValue = img_camfeed.VerticalScrollBar.Visible ? (int)img_camfeed.VerticalScrollBar.Value : 0;
-            txt_coordinates.Text = Convert.ToString(offsetX + horizontalScrollBarValue) + "." + Convert.ToString(offsetY + verticalScrollBarValue + "  ImgSize: " + frame.Size);
+            offsetX = (int) (e.Location.X/img_camfeed.ZoomScale);
+            offsetY = (int) (e.Location.Y/img_camfeed.ZoomScale);
+            horizontalScrollBarValue = img_camfeed.HorizontalScrollBar.Visible
+                ? (int) img_camfeed.HorizontalScrollBar.Value
+                : 0;
+            verticalScrollBarValue = img_camfeed.VerticalScrollBar.Visible
+                ? (int) img_camfeed.VerticalScrollBar.Value
+                : 0;
+            txt_coordinates.Text = Convert.ToString(offsetX + horizontalScrollBarValue) + "." +
+                                   Convert.ToString(offsetY + verticalScrollBarValue + "  ImgSize: " + frame.Size);
         }
 
         private void ScreenToWorld_Mapping(int x, int y)
         {
-            double _x = -344 - (x * 1.664);
-            double _y = 530 - (y * 1.664);
+            double _x = -337.8 - (x*0.86);
+            double _y = 533.8 - (y* 0.86);
 
             RobotMoveJoint(_y, _x, 0, -165, 0, 90, 200);
         }
@@ -456,19 +630,18 @@ namespace FanucConnector
 
         }
 
-
         private void ReleaseData()
         {
             if (_capture != null)
                 _capture.Dispose();
         }
 
-        void colorFilter(Mat frameHSV, float minHue, float maxHue, float minSat, float maxSat, float minVal, float maxVal, bool red)
+        void colorFilter(Mat frameHSV, Color color, float minHue, float maxHue, float minSat, float maxSat, float minVal, float maxVal, bool red)
         {
             Mat element = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(7, 7), new Point(3, 3));
 
-            Image<Hsv, Byte>  frameHSV_3 = frameHSV.ToImage<Hsv, Byte>();
-            Image<Gray, Byte>[] channels = frameHSV_3.Split();  
+            Image<Hsv, Byte> frameHSV_3 = frameHSV.ToImage<Hsv, Byte>();
+            Image<Gray, Byte>[] channels = frameHSV_3.Split();
             Image<Gray, Byte> imghue = channels[0];
             Image<Gray, Byte> imgsat = channels[1];
             Image<Gray, Byte> imgval = channels[2];
@@ -491,83 +664,79 @@ namespace FanucConnector
             imgval = imgval.InRange(new Gray(minVal), new Gray(maxVal));
             imghue = imghue.And(imgsat);
             imghue = imghue.And(imgval);
-            imghue = imghue.MorphologyEx(MorphOp.Close, element, new Point(3,3), 1, BorderType.Default,  new MCvScalar(1));
+            imghue = imghue.MorphologyEx(MorphOp.Close, element, new Point(3, 3), 1, BorderType.Default,
+                new MCvScalar(1));
             imghue.MinMax(out min, out max, out minLocation, out maxLocation);
             imghue = (imghue/max[0])*255;
+
 
             CvInvoke.NamedWindow("Some window", NamedWindowType.AutoSize);
             CvInvoke.Imshow("Some window", imghue);
 
+            blobAnalysis(imghue.Mat, this.frameHSV, color);
         }
 
-        //void blobAnalysis(Mat binaryIm, Mat frameHSV)
-        //{
-        //    int largest_area = 0;
-        //    int largest_contour_index = 0;
-        //    Rectangle bounding_rect = new Rectangle();
-        //    Rectangle bounding_rectDef = new Rectangle();
+        void blobAnalysis(Mat binaryIm, Mat frameHSV, Color color)
+        {
+            int largest_area = 0;
+            int largest_contour_index = 0;
+            Rectangle bounding_rect = new Rectangle();
+            Rectangle bounding_rectDef = new Rectangle();
 
-        //    VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
-        //    Mat hierarchy = new Mat();
+            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+            Mat hierarchy = new Mat();
 
-        //    Mat conBin = binaryIm.Clone();
-        //    CvInvoke.FindContours(conBin, contours, hierarchy, RetrType.Ccomp, ChainApproxMethod.ChainApproxSimple);
+            Mat conBin = binaryIm.Clone();
+            CvInvoke.FindContours(conBin, contours, hierarchy, RetrType.Ccomp, ChainApproxMethod.ChainApproxSimple);
 
-        //    for (int i = 0; i < contours.Size; i++) // iterate through each contour.
-        //    {
-        //        double a = CvInvoke.ContourArea(contours[i], false);  //  Find the area of contour
-        //        bounding_rect = CvInvoke.BoundingRectangle(contours[i]);
-        //        int totElements = bounding_rect.Width * bounding_rect.Height;
-        //        Image<Gray, Byte> sausage = binaryIm.ToImage<Gray, Byte>();
-        //        sausage.ROI = bounding_rect;
-        //        sausage.get
-        //            binaryIm(bounding_rect))[0] / totElements) * 0.3921;
+            for (int i = 0; i < contours.Size; i++) // iterate through each contour.
+            {
+                double a = CvInvoke.ContourArea(contours[i], false); //  Find the area of contour
+                bounding_rect = CvInvoke.BoundingRectangle(contours[i]);
+                int totElements = bounding_rect.Width*bounding_rect.Height;
+                double perc = CvInvoke.Sum(new Mat(binaryIm, bounding_rect)).V0/totElements*0.3921;
 
-        //        rectangle(frameHSV, bounding_rect, Scalar(0, 0, 0), 2, 8, 0);
-        //        cout << "Contours: " << contours[i] << endl;
-        //        cout << "i: " << i << "; bounding: " << bounding_rect << endl;
-        //        cout << "Percentage: " << Perc << endl;
+                //txt_algorithmoutput.Text = perc + " ; " + totElements + " ; " + a;
 
-        //        //double RecRatio = bounding_rect.size().width/bounding_rect.size().height;
+                if (perc > 35 && (totElements > 300) && (totElements<1000))
+                {
+                    Point center = new Point(bounding_rect.X +(bounding_rect.Width/2),bounding_rect.Y+(bounding_rect.Height/2));
+                    int minX = 10000;
+                    int minY = 10000;
+                    Point coord1 = new Point();
+                    Point coord2 = new Point();
 
+                    for (int j = 0; j < contours[i].Size; j++)
+                    {
+                        if (contours[i][j].X < minX)
+                        {
+                            minX = contours[i][j].X;
+                            coord1 = contours[i][j];
+                        }
+                        if(contours[i][j].Y < minY)
+                        {
+                            minY = contours[i][j].Y;
+                            coord2 = contours[i][j];
+                        }
+                    }
+                    CvInvoke.Line(frameHSV, coord1, new Point(coord1.X, coord2.Y), new MCvScalar(255, 255, 255), 2, LineType.AntiAlias, 0);
+                    CvInvoke.Line(frameHSV, coord1, coord2, new MCvScalar(255, 255, 255), 2, LineType.AntiAlias, 0);
 
-        //        if ((Perc > 50) && (totElements > 100))
-        //        {
-        //            Point center = Point(bounding_rect.x + (bounding_rect.size().width / 2), bounding_rect.y + (bounding_rect.size().height / 2));
-        //            int minX = 100000;
-        //            int minY = 100000;
-        //            Point coord1, coord2;
+                    Point slopeA  = new Point(coord1.X-coord1.X, coord2.Y-coord1.Y);
+                    Point slopeB = new Point(coord2.X-coord1.X, coord2.Y-coord1.Y);
 
-        //            for (int j = 0; j < contours[i].size(); j++)
-        //            {
-        //                if (contours[i][j].x < minX)
-        //                {
-        //                    minX = contours[i][j].x;
-        //                    coord1 = contours[i][j];
-        //                }
-        //                if (contours[i][j].y < minY)
-        //                {
-        //                    minY = contours[i][j].y;
-        //                    coord2 = contours[i][j];
-        //                }
-        //            }
+                    double angle = Math.Atan2(slopeB.X, slopeB.Y) - Math.Atan2(slopeA.X, slopeA.Y);
+                    angle = angle*(180/Math.PI);
 
-        //            line(frameHSV, coord1, Point(coord1.x, coord2.y), Scalar(255, 255, 255), 2, 8, 0);
-        //            line(frameHSV, coord1, coord2, Scalar(255, 255, 255), 2, 8, 0);
+                    bounding_rectDef = CvInvoke.BoundingRectangle(contours[i]);
 
-        //            Point SlopeA = Point(coord1.x, coord2.y) - coord1;
-        //            Point SlopeB = (coord2 - coord1);
+                    _availibleBricks.Add(new Brick(color, center, angle));
+                }
+            }
 
-        //            double angle = atan2(SlopeB.x, SlopeB.y) - atan2(SlopeA.x, SlopeA.y);
-        //            angle = angle * (180 / CV_PI);
+            CvInvoke.NamedWindow("Some other window", NamedWindowType.AutoSize);
+            CvInvoke.Imshow("Some other window", frameHSV);
 
-        //            bounding_rectDef = boundingRect(contours[i]);
-        //        }
-        //    }
-        //    imshow("Found Largest Contour", frameHSV);
-        //}
-
-
-
+        }
     }
 }

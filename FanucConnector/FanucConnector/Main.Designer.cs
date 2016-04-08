@@ -66,6 +66,8 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.img_camfeed = new Emgu.CV.UI.ImageBox();
             this.txt_coordinates = new System.Windows.Forms.TextBox();
+            this.txt_algorithmoutput = new System.Windows.Forms.TextBox();
+            this.btn_calibrate = new System.Windows.Forms.Button();
             this.gBox_networking.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -440,11 +442,31 @@
             this.txt_coordinates.Size = new System.Drawing.Size(639, 29);
             this.txt_coordinates.TabIndex = 23;
             // 
+            // txt_algorithmoutput
+            // 
+            this.txt_algorithmoutput.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txt_algorithmoutput.Location = new System.Drawing.Point(18, 415);
+            this.txt_algorithmoutput.Name = "txt_algorithmoutput";
+            this.txt_algorithmoutput.Size = new System.Drawing.Size(513, 29);
+            this.txt_algorithmoutput.TabIndex = 24;
+            // 
+            // btn_calibrate
+            // 
+            this.btn_calibrate.Location = new System.Drawing.Point(1437, 646);
+            this.btn_calibrate.Name = "btn_calibrate";
+            this.btn_calibrate.Size = new System.Drawing.Size(75, 23);
+            this.btn_calibrate.TabIndex = 25;
+            this.btn_calibrate.Text = "Calibrate";
+            this.btn_calibrate.UseVisualStyleBackColor = true;
+            this.btn_calibrate.Click += new System.EventHandler(this.btn_calibrate_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1524, 681);
+            this.Controls.Add(this.btn_calibrate);
+            this.Controls.Add(this.txt_algorithmoutput);
             this.Controls.Add(this.txt_coordinates);
             this.Controls.Add(this.img_camfeed);
             this.Controls.Add(this.groupBox3);
@@ -505,6 +527,8 @@
         private System.Windows.Forms.Button btn_up;
         private Emgu.CV.UI.ImageBox img_camfeed;
         private System.Windows.Forms.TextBox txt_coordinates;
+        private System.Windows.Forms.TextBox txt_algorithmoutput;
+        private System.Windows.Forms.Button btn_calibrate;
     }
 }
 
