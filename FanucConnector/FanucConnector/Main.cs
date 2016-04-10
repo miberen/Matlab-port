@@ -64,13 +64,13 @@ namespace FanucConnector
             CvInvoke.UseOpenCL = false;
             try
             {
-                _capture = new Emgu.CV.Capture(CaptureType.DShow);
-                _capture.SetCaptureProperty(CapProp.FrameWidth, 1280);
-                _capture.SetCaptureProperty(CapProp.FrameHeight, 720);
-                _capture.SetCaptureProperty(CapProp.Settings, 0);
-                _capture.ImageGrabbed += ProcessFrame;
+                //_capture = new Emgu.CV.Capture(CaptureType.DShow);
+                //_capture.SetCaptureProperty(CapProp.FrameWidth, 1280);
+                //_capture.SetCaptureProperty(CapProp.FrameHeight, 720);
+                //_capture.SetCaptureProperty(CapProp.Settings, 0);
+                //_capture.ImageGrabbed += ProcessFrame;
 
-                //frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im0.jpg", LoadImageType.AnyColor);
+                frame = CvInvoke.Imread(@"D:\GDrive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im720a.jpg", LoadImageType.AnyColor);
                 //CvInvoke.Undistort(frame, frame, _cameraMatrix, _distCoeffs);
                 Application.Idle += ProcessFrame;
 
@@ -85,10 +85,10 @@ namespace FanucConnector
         private void ProcessFrame(object sender, EventArgs e)
         {
 
-            _capture.Retrieve(frame, 0);
+            // _capture.Retrieve(frame, 0);
             frame.CopyTo(undistFrame);
-           if (_isCalibrated)
-            CvInvoke.Undistort(frame, undistFrame, _cameraMatrix, _distCoeffs);
+            //if (_isCalibrated)
+            // CvInvoke.Undistort(frame, undistFrame, _cameraMatrix, _distCoeffs);
             CvInvoke.CvtColor(undistFrame, frameHSV, ColorConversion.Bgr2Hsv);
 
             //CvInvoke.PutText(frame, "X-Coordinate " + offsetX, new System.Drawing.Point(50, 20), FontFace.HersheyPlain, 1.5, new Bgr(155, 50, 50).MCvScalar);
@@ -113,15 +113,15 @@ namespace FanucConnector
             public ColorFilt(Color color)
             {
                 if (color == Color.Blue)
-                    _filter = new List<object> {105F, 125f, 150f, 255f, 25f, 255f, false};
+                    _filter = new List<object> {110, 120, 230, 255, 230, 255, false};
                 else if (color == Color.Yellow)
-                    _filter = new List<object> {12f, 18f, 170f, 255f, 220f, 255f, false};
+                    _filter = new List<object> {20, 25, 165, 229, 200, 255, false};
                 else if (color == Color.Orange)
-                    _filter = new List<object> {5f, 10f, 200f, 255f, 200f, 255f, false};
+                    _filter = new List<object> {0, 10, 153, 204, 215, 255, false};
                 else if (color == Color.Green)
-                    _filter = new List<object> {27f, 37f, 170f, 255f, 140f, 255f, false};
+                    _filter = new List<object> {50, 75, 175, 229, 153, 229, false};
                 else if (color == Color.White)
-                    _filter = new List<object> {0, 255, 0, 63, 220, 255, false};
+                    _filter = new List<object> {70, 100, 25, 90, 229, 255, false};
                 else
                 {
                     MessageBox.Show(@"Color not found");
@@ -566,6 +566,12 @@ namespace FanucConnector
                 lbl_isValidated.Text = @"True";
             }
 
+            SortedList<double, Brick> testList = DistanceSortedList(_availibleBricks, new Point(0, 0));
+            
+            foreach(var x in testList)
+            {
+                rTBox_main.AppendText("Distance (Key): " + x.Key + "Brick: " + x.Value + "\n");
+            }
         }
 
         private void btn_calibrate_Click(object sender, EventArgs e)
@@ -625,6 +631,37 @@ namespace FanucConnector
             RobotMoveJoint(_y, _x, 0, -165, 0, 90, 200);
         }
 
+        private Point WorldToScreen_Mapping(List<double> pos)
+        {
+            Point imgCoord = new Point();
+            imgCoord.X = (ushort)((pos.ElementAt(1) - (-334)) * 1.163);
+            imgCoord.Y = (ushort)((pos.ElementAt(0) - 534) * 1.163);
+
+            return imgCoord;
+        }
+
+        private SortedList<double, Brick> DistanceSortedList(List<Brick> brickList, Point robotPos)
+        {
+            SortedList<double, Brick> sortedList = new SortedList<double, Brick>();
+            double distance;
+
+            foreach(var brick in brickList)
+            {
+                distance = DistanceBetweenPoints(brick.Position, robotPos);
+                sortedList.Add(distance, brick);
+            }
+            return sortedList;
+        }
+
+        private double DistanceBetweenPoints(Point x, Point y)
+        {
+            double distance = 0;
+
+            distance = Math.Sqrt(Math.Pow(y.X - x.X, 2) + Math.Pow(y.Y - x.Y, 2));
+
+            return distance; 
+        }
+
         private void ScreenToWorld(int x, int y)
         {
 
@@ -664,14 +701,14 @@ namespace FanucConnector
             imgval = imgval.InRange(new Gray(minVal), new Gray(maxVal));
             imghue = imghue.And(imgsat);
             imghue = imghue.And(imgval);
-            imghue = imghue.MorphologyEx(MorphOp.Close, element, new Point(3, 3), 1, BorderType.Default,
+            imghue = imghue.MorphologyEx(MorphOp.Close, element, new Point(3, 3), 3, BorderType.Default,
                 new MCvScalar(1));
             imghue.MinMax(out min, out max, out minLocation, out maxLocation);
             imghue = (imghue/max[0])*255;
 
 
-            CvInvoke.NamedWindow("Some window", NamedWindowType.AutoSize);
-            CvInvoke.Imshow("Some window", imghue);
+            CvInvoke.NamedWindow("Some window " + color.ToString(), NamedWindowType.AutoSize);
+            CvInvoke.Imshow("Some window " + color.ToString(), imghue);
 
             blobAnalysis(imghue.Mat, this.frameHSV, color);
         }
@@ -694,12 +731,17 @@ namespace FanucConnector
                 double a = CvInvoke.ContourArea(contours[i], false); //  Find the area of contour
                 bounding_rect = CvInvoke.BoundingRectangle(contours[i]);
                 int totElements = bounding_rect.Width*bounding_rect.Height;
-                double perc = CvInvoke.Sum(new Mat(binaryIm, bounding_rect)).V0/totElements*0.3921;
+                double perc = CvInvoke.Sum(new Mat(binaryIm, bounding_rect)).V0 / totElements *0.3921;
+                double rectRatio = ((double)bounding_rect.Width / (double)bounding_rect.Height) * 100;
+
+
 
                 //txt_algorithmoutput.Text = perc + " ; " + totElements + " ; " + a;
 
-                if (perc > 35 && (totElements > 300) && (totElements<1000))
+                if (perc > 45 && totElements > 1000 && totElements < 3000 && (rectRatio > 75 && rectRatio < 125))
                 {
+
+                    CvInvoke.Rectangle(frameHSV, bounding_rect, new MCvScalar(0, 0, 0), 2, LineType.EightConnected, 0);
                     Point center = new Point(bounding_rect.X +(bounding_rect.Width/2),bounding_rect.Y+(bounding_rect.Height/2));
                     int minX = 10000;
                     int minY = 10000;
@@ -731,11 +773,13 @@ namespace FanucConnector
                     bounding_rectDef = CvInvoke.BoundingRectangle(contours[i]);
 
                     _availibleBricks.Add(new Brick(color, center, angle));
+                    CvInvoke.NamedWindow("Bounding box and angle " + color.ToString(), NamedWindowType.AutoSize);
+                    CvInvoke.Imshow("Bounding box and angle " + color.ToString(), frameHSV);
                 }
+            
             }
 
-            CvInvoke.NamedWindow("Some other window", NamedWindowType.AutoSize);
-            CvInvoke.Imshow("Some other window", frameHSV);
+            
 
         }
     }
