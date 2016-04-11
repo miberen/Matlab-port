@@ -1,57 +1,6 @@
-C:\Matlab port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
-C:\Matlab port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
-C:\Matlab port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
-C:\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
-C:\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
-C:\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
-C:\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
-C:\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
-C:\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
-C:\Users\Nicolai\Documents\Visual Studio 2015\Projects\Matlab port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
-C:\Users\Nicolai\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
-C:\Users\AnonUser\Desktop\Matlab-port-master\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
-C:\Users\AnonUser\Documents\Matlab-port\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
-C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
-C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
-C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
-C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
-C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
-C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\Emgu.CV.UI.dll
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\Emgu.CV.World.dll
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\ZedGraph.dll
@@ -62,22 +11,10 @@ C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\ZedGraph.xml
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\zh-CN\Emgu.CV.UI.resources.dll
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\zh-CN\ZedGraph.resources.dll
+C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
 C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Calibrator.resources
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe.config
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\FanucConnector.exe
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\FanucConnector.pdb
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\ZedGraph.dll
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\Emgu.CV.UI.pdb
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\Emgu.CV.UI.xml
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\Emgu.CV.World.pdb
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\Emgu.CV.World.xml
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\ZedGraph.xml
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\zh-CN\Emgu.CV.UI.resources.dll
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\bin\Debug\zh-CN\ZedGraph.resources.dll
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csprojResolveAssemblyReference.cache
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Calibrator.resources
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
-C:\Users\CrillzPC\Documents\Github\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
+C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Main.resources
+C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.Properties.Resources.resources
+C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.csproj.GenerateResource.Cache
+C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.exe
+C:\Users\Christian\Documents\AAU\P8VGIS\FanucConnector\FanucConnector\obj\Debug\FanucConnector.pdb
