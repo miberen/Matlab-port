@@ -65,13 +65,13 @@ namespace FanucConnector
             CvInvoke.UseOpenCL = false;
             try
             {
-                //_capture = new Emgu.CV.Capture(CaptureType.DShow);
-                //_capture.SetCaptureProperty(CapProp.FrameWidth, 1280);
-                //_capture.SetCaptureProperty(CapProp.FrameHeight, 720);
-                //_capture.SetCaptureProperty(CapProp.Settings, 0);
-                //_capture.ImageGrabbed += ProcessFrame;
+                _capture = new Emgu.CV.Capture(CaptureType.DShow);
+                _capture.SetCaptureProperty(CapProp.FrameWidth, 1280);
+                _capture.SetCaptureProperty(CapProp.FrameHeight, 720);
+                _capture.SetCaptureProperty(CapProp.Settings, 0);
+                _capture.ImageGrabbed += ProcessFrame;
 
-                frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im720a.jpg", LoadImageType.AnyColor);
+                //frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im720a.jpg", LoadImageType.AnyColor);
                 Application.Idle += ProcessFrame;
 
             }
@@ -85,7 +85,7 @@ namespace FanucConnector
         private void ProcessFrame(object sender, EventArgs e)
         {
 
-            //_capture.Retrieve(frame, 0);
+            _capture.Retrieve(frame, 0);
             frame.CopyTo(undistFrame);
             if (_isCalibrated)
             CvInvoke.Undistort(frame, undistFrame, _cameraMatrix, _distCoeffs);
@@ -113,15 +113,15 @@ namespace FanucConnector
             public ColorFilt(Color color)
             {
                 if (color == Color.Blue)
-                    _filter = new List<object> {110, 120, 230, 255, 153, 255, false};
+                    _filter = new List<object> {110, 120, 230, 255, 100, 255, false};
                 else if (color == Color.Yellow)
-                    _filter = new List<object> {20, 25, 190, 255, 220, 255, false};
+                    _filter = new List<object> {20, 32, 120, 255, 170, 255, false};
                 else if (color == Color.Orange)
-                    _filter = new List<object> {0, 10, 153, 204, 215, 255, false};
+                    _filter = new List<object> {5, 15, 153, 255, 185, 255, false};
                 else if (color == Color.Green)
-                    _filter = new List<object> {50, 75, 175, 229, 153, 229, false};
+                    _filter = new List<object> {40, 62, 100, 255, 120, 255, false};
                 else if (color == Color.White)
-                    _filter = new List<object> {70, 105, 25, 90, 229, 255, false};
+                    _filter = new List<object> {74, 100, 2, 90, 229, 255, false};
                 else
                 {
                     MessageBox.Show(@"Color not found");
@@ -293,7 +293,7 @@ namespace FanucConnector
         {
             if (_hostStream.CanWrite)
             {
-                _hostStream.Flush();
+                ClearBuff();
                 byte[] outStream = Encoding.ASCII.GetBytes(data);
                 List<byte> outList = outStream.ToList();
                 outList.Add(10);
@@ -323,6 +323,18 @@ namespace FanucConnector
             rTBox_main.AppendText("\n");
         }
 
+        private void ClearBuff()
+        {
+            if (_hostStream.DataAvailable)
+            {
+                byte[] inStream = new byte[1024];
+                _hostStream.Read(inStream, 0, inStream.Length);
+                string returnData = Encoding.ASCII.GetString(inStream);
+                rTBox_main.AppendText("DATA FLUSHED: " + returnData);
+                rTBox_main.AppendText("\n");
+            }
+        }
+
         List<double> RobotGetPos()
         {
 
@@ -347,7 +359,6 @@ namespace FanucConnector
                 position.Add(double.Parse(strs, new CultureInfo("en-US")));
                 //position.Add(Convert.ToDouble(strs, new CultureInfo("en-US")));
             }
-
             txt_coord0.Text = position[0].ToString();
             txt_coord1.Text = position[1].ToString();
             txt_coord2.Text = position[2].ToString();
@@ -571,19 +582,32 @@ namespace FanucConnector
             {
                 rTBox_main.AppendText("Distance (Key): " + x.Key + "Brick: " + x.Value + "\n");
             }
-
+            int zOffSet = 15;
+            int xOffSet = 80;
+            int i = 0;
+            int j = 0;
             foreach (var figure in _orders)
             {
+                i++;
+                Point assemblyPoint = new Point(525 - i * xOffSet, -525);
+                j = 0;
                 foreach (var color in figure.Color)
                 {
+                    j++;
                     foreach (var brick in testList)
                     {
                         if (brick.Value.Color == color)
                         {
                             Point temPoint = ScreenToWorld(brick.Value.Position.X, brick.Value.Position.Y);
-                            RobotMoveJoint(temPoint.Y, temPoint.X, -35, -165, 0, 90+brick.Value.Angle, 300);
+                            RobotMoveJoint(temPoint.Y, temPoint.X, 0, -165, 0, 90+brick.Value.Angle, double.Parse(txt_speed.Text));
                             rTBox_main.AppendText("X: " + temPoint.Y + "Y: " + temPoint.X + "Angle. " + (90 + brick.Value.Angle) + "\n");
-                            RobotMoveJoint(370,-525,-35,-165,0,90,300);
+                            RobotMoveJoint(temPoint.Y, temPoint.X, -60, -165, 0, 90 + brick.Value.Angle, double.Parse(txt_speed.Text));  
+                            CloseGrapper();
+                            RobotMoveJoint(temPoint.Y, temPoint.X, 0, -165, 0, 90 + brick.Value.Angle, double.Parse(txt_speed.Text));
+                            RobotMoveJoint(assemblyPoint.X, assemblyPoint.Y, 0,-165,0,90, double.Parse(txt_speed.Text));
+                            RobotMoveJoint(assemblyPoint.X, assemblyPoint.Y, -75+j*zOffSet, -165, 0, 90, double.Parse(txt_speed.Text));
+                            OpenGrapper();
+                            RobotMoveJoint(assemblyPoint.X, assemblyPoint.Y, 0, -165, 0, 90, double.Parse(txt_speed.Text));
                             testList.Remove(brick.Key);
                             break;
                         }
@@ -642,8 +666,8 @@ namespace FanucConnector
 
         private void ScreenToWorld_Mapping(int x, int y)
         {
-            double _x = -334.04 - (x*0.868);
-            double _y = 536.604 - (y* 0.868);
+            double _x = -336.04 - (x*0.868);
+            double _y = 532.604 - (y* 0.868);
 
             RobotMoveJoint(_y, _x, 0, -165, 0, 90, 200);
         }
@@ -652,8 +676,8 @@ namespace FanucConnector
         {
             Point tempPoint = new Point();
 
-            tempPoint.X =(int)(-334.04 - (x * 0.868));
-            tempPoint.Y = (int)(536.604 - (y * 0.868));
+            tempPoint.X =(int)(-336.04 - (x * 0.868));
+            tempPoint.Y = (int)(532.604 - (y * 0.868));
 
             return tempPoint;
         }
@@ -661,8 +685,8 @@ namespace FanucConnector
         private Point WorldToScreen_Mapping(List<double> pos)
         {
             Point imgCoord = new Point();
-            imgCoord.X = (int)Math.Abs((pos.ElementAt(1) - (-334.04)) * 1.132);
-            imgCoord.Y = (int)Math.Abs((pos.ElementAt(0) - 536.604) * 1.132);
+            imgCoord.X = (int)Math.Abs((pos.ElementAt(1) - (-336.04)) * 1.132);
+            imgCoord.Y = (int)Math.Abs((pos.ElementAt(0) - 532.604) * 1.132);
 
             return imgCoord;
         }
