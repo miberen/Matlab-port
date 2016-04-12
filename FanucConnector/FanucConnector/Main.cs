@@ -65,13 +65,13 @@ namespace FanucConnector
             CvInvoke.UseOpenCL = false;
             try
             {
-                _capture = new Emgu.CV.Capture(CaptureType.DShow);
-                _capture.SetCaptureProperty(CapProp.FrameWidth, 1280);
-                _capture.SetCaptureProperty(CapProp.FrameHeight, 720);
-                _capture.SetCaptureProperty(CapProp.Settings, 0);
-                _capture.ImageGrabbed += ProcessFrame;
+                //_capture = new Emgu.CV.Capture(CaptureType.DShow);
+                //_capture.SetCaptureProperty(CapProp.FrameWidth, 1280);
+                //_capture.SetCaptureProperty(CapProp.FrameHeight, 720);
+                //_capture.SetCaptureProperty(CapProp.Settings, 0);
+                //_capture.ImageGrabbed += ProcessFrame;
 
-                //frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im720a.jpg", LoadImageType.AnyColor);
+                frame = CvInvoke.Imread(@"C:\Users\Christian\Google Drive\AAU\P8 VGIS\Courses\Robot Vision\Mini Project\Imgbricks\im720a.jpg", LoadImageType.AnyColor);
                 Application.Idle += ProcessFrame;
 
             }
@@ -85,7 +85,7 @@ namespace FanucConnector
         private void ProcessFrame(object sender, EventArgs e)
         {
 
-            _capture.Retrieve(frame, 0);
+            //_capture.Retrieve(frame, 0);
             frame.CopyTo(undistFrame);
             if (_isCalibrated)
             CvInvoke.Undistort(frame, undistFrame, _cameraMatrix, _distCoeffs);
@@ -360,24 +360,24 @@ namespace FanucConnector
 
         void RobotMoveJoint(double x, double y, double z, double w, double p, double r, double speed)
         {
-            const string whatTheFuck = ".#################################;-.##################################;0";
+            const string stringFormat = ".#################################;-.##################################;0";
 #if LOG
-            rTBox_main.AppendText("MOVEJ;[" + x.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                  y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                  z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                  w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                  p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                  r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                                  speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
+            rTBox_main.AppendText("MOVEJ;[" + x.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                                  y.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                                  z.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                                  w.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                                  p.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                                  r.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                                  speed.ToString(stringFormat, new CultureInfo("en-US")) + "];");
 #endif
 
-            RobotSend("MOVEJ;[" + x.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                      y.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                      z.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                      w.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                      p.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                      r.ToString(whatTheFuck, new CultureInfo("en-US")) + "," +
-                      speed.ToString(whatTheFuck, new CultureInfo("en-US")) + "];");
+            RobotSend("MOVEJ;[" + x.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                      y.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                      z.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                      w.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                      p.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                      r.ToString(stringFormat, new CultureInfo("en-US")) + "," +
+                      speed.ToString(stringFormat, new CultureInfo("en-US")) + "];");
             RecieveData();
             RecieveData();
 
@@ -559,7 +559,6 @@ namespace FanucConnector
                 rTBox_main.AppendText("Order is approved - prepping for assembly\n");
                 _orderApproved = true;
                 lbl_isValidated.Text = @"True";
-
             }
         }
 
@@ -607,7 +606,6 @@ namespace FanucConnector
 
                 }
             }
-
         }
 
         #endregion
@@ -760,10 +758,6 @@ namespace FanucConnector
                 double perc = CvInvoke.Sum(new Mat(binaryIm, bounding_rect)).V0 / totElements *0.3921;
                 double rectRatio = ((double)bounding_rect.Width / (double)bounding_rect.Height) * 100;
 
-
-
-                //txt_algorithmoutput.Text = perc + " ; " + totElements + " ; " + a;
-
                 if (perc > 45 && totElements > 1000 && totElements < 3000 && (rectRatio > 75 && rectRatio < 125))
                 {
 
@@ -804,9 +798,6 @@ namespace FanucConnector
                 }
             
             }
-
-            
-
         }
     }
 }
